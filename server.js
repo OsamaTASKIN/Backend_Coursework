@@ -19,18 +19,19 @@ app.use((req, res, next) => {
   next();
 });
 
-
-
-// Serve Static Images
-const imagesPath = path.join(__dirname, "images");
-app.use("/images", express.static(imagesPath));
-
-// Example Endpoint to Test Static Files
-app.get("/test-image", (req, res) => {
-  res.send({
-    imageUrl: `${req.protocol}://${req.get("host")}/images/example.jpg`, // Replace "example.jpg" with your image filename
-  });
-});
+// MongoDB Connection
+let db;
+MongoClient.connect(
+  "mongodb+srv://osama:osama@cluster0.gg4u5.mongodb.net/",
+  (err, client) => {
+    if (err) {
+      console.error("Failed to connect to MongoDB:", err);
+      process.exit(1);
+    }
+    db = client.db("School__Activities");
+    console.log("Connected to MongoDB");
+  }
+);
 
 // Middleware to log search queries dynamically using RegExp
 app.use((req, res, next) => {
