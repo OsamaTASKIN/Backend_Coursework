@@ -1,0 +1,93 @@
+[
+    {
+      "id": 102,
+      "title": "Chess Club",
+      "subject": "Chess",
+      "location": "Ajman",
+      "price": 155,
+      "image": "images/chess.jpg",
+      "AvailableInventory": 23,
+      "rating": 5
+    },
+    {
+      "id": 103,
+      "title": "Track And Field",
+      "subject": "Track",
+      "location": "Ajman",
+      "price": 130,
+      "image": "images/track.jpg",
+      "AvailableInventory": 25,
+      "rating": 3
+    },
+    {
+      "id": 104,
+      "title": "Art Club",
+      "subject": "Art",
+      "location": "Dubai",
+      "price": 80,
+      "image": "images/art.jpg",
+      "AvailableInventory": 15,
+      "rating": 3
+    },
+    {
+      "id": 105,
+      "title": "Comics Club",
+      "subject": "Comics",
+      "location": "Internet City",
+      "price": 100,
+      "image": "images/comics.jpg",
+      "AvailableInventory": 25,
+      "rating": 3
+    },
+    {
+      "id": 106,
+      "title": "Football Club",
+      "subject": "Football",
+      "location": "Dubai",
+      "price": 195,
+      "image": "images/football.jpg",
+      "AvailableInventory": 25,
+      "rating": 3
+    },
+    {
+      "id": 107,
+      "title": "Debate Club",
+      "subject": "Debate",
+      "location": "Free Zone",
+      "price": 130,
+      "image": "images/debate.jpg",
+      "AvailableInventory": 18,
+      "rating": 4
+    },
+    {
+      "id": 108,
+      "title": "Robotics Club",
+      "subject": "Robotics",
+      "location": "Sharjah",
+      "price": 170,
+      "image": "images/robotics.jpg",
+      "AvailableInventory": 10,
+      "rating": 5
+    },
+    {
+      "id": 109,
+      "title": "Drama Club",
+      "subject": "Drama",
+      "location": "Dubai",
+      "price": 150,
+      "image": "images/Drama.jpg",
+      "AvailableInventory": 8,
+      "rating": 5
+    },
+    {
+      "id": 110,
+      "title": "Dance Club",
+      "subject": "Dance",
+      "location": "Abu Dhabi",
+      "price": 120,
+      "image": "images/dance.jpg",
+      "AvailableInventory": 5,
+      "rating": 4
+    }
+  ]
+  
