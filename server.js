@@ -44,8 +44,19 @@ app.get("/test-image", (req, res) => {
   });
 });
 
-
-
+// Middleware to log search queries dynamically using RegExp
+app.use((req, res, next) => {
+  const searchRegex = /log-search/; // Matches the /log-search endpoint
+  if (searchRegex.test(req.url) && req.method === "GET") {
+    const searchQuery = req.query.query?.trim(); // Extract search query
+    if (searchQuery) {
+      console.log(`User searched for: ${searchQuery}`); // Log the search term
+    } else {
+      console.warn("Search query is missing or empty");
+    }
+  }
+  next(); // Proceed to the next middleware or route handler
+});
 
 // Log search activities and fetch matching results from 'lessons' collection
 app.get("/log-search", async (req, res) => {
