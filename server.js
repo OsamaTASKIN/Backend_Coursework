@@ -19,19 +19,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// MongoDB Connection
-let db;
-MongoClient.connect(
-  "mongodb+srv://osama:osama@cluster0.gg4u5.mongodb.net/",
-  (err, client) => {
-    if (err) {
-      console.error("Failed to connect to MongoDB:", err);
-      process.exit(1);
-    }
-    db = client.db("School__Activities");
-    console.log("Connected to MongoDB");
-  }
-);
+
 
 // Serve Static Images
 const imagesPath = path.join(__dirname, "images");
