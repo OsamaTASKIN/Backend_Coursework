@@ -33,19 +33,19 @@ MongoClient.connect(
   }
 );
 
-// Middleware to log search queries dynamically using RegExp
-app.use((req, res, next) => {
-  const searchRegex = /log-search/; // Matches the /log-search endpoint
-  if (searchRegex.test(req.url) && req.method === "GET") {
-    const searchQuery = req.query.query?.trim(); // Extract search query
-    if (searchQuery) {
-      console.log(`User searched for: ${searchQuery}`); // Log the search term
-    } else {
-      console.warn("Search query is missing or empty");
-    }
-  }
-  next(); // Proceed to the next middleware or route handler
+// Serve Static Images
+const imagesPath = path.join(__dirname, "images");
+app.use("/images", express.static(imagesPath));
+
+// Example Endpoint to Test Static Files
+app.get("/test-image", (req, res) => {
+  res.send({
+    imageUrl: `${req.protocol}://${req.get("host")}/images/example.jpg`, // Replace "example.jpg" with your image filename
+  });
 });
+
+
+
 
 // Log search activities and fetch matching results from 'lessons' collection
 app.get("/log-search", async (req, res) => {
