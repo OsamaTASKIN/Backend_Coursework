@@ -7,6 +7,22 @@ const app = express();
 app.use(express.json());
 app.set("port", 3000);
 
+// Log function with timestamp and date
+function logActivity(activity, details = "") {
+  const time = new Date();
+  const formattedTime = time.toLocaleString("en-US", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+
+  const logMessage = `[${formattedTime}] ${activity}${details ? ` | ${details}` : ""}`;
+  console.log(logMessage);
+}
+
 // CORS headers
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -25,11 +41,11 @@ MongoClient.connect(
   "mongodb+srv://osama:osama@cluster0.gg4u5.mongodb.net/",
   (err, client) => {
     if (err) {
-      console.error("Failed to connect to MongoDB:", err);
+      logActivity("Error", `Failed to connect to MongoDB: ${err.message}`);
       process.exit(1);
     }
     db = client.db("School__Activities");
-    console.log("Connected to MongoDB");
+    logActivity("Info", "Connected to MongoDB");
   }
 );
 
@@ -39,6 +55,7 @@ app.use("/images", express.static(imagesPath));
 
 // Example Endpoint to Test Static Files
 app.get("/test-image", (req, res) => {
+  logActivity("Info", "Test image endpoint hit");
   res.send({
     imageUrl: `${req.protocol}://${req.get("host")}/images/example.jpg`, // Replace "example.jpg" with your image filename
   });
@@ -50,9 +67,9 @@ app.use((req, res, next) => {
   if (searchRegex.test(req.url) && req.method === "GET") {
     const searchQuery = req.query.query?.trim(); // Extract search query
     if (searchQuery) {
-      console.log(`User searched for: ${searchQuery}`); // Log the search term
+      logActivity("Info", `User searched for: ${searchQuery}`);
     } else {
-      console.warn("Search query is missing or empty");
+      logActivity("Warning", "Search query is missing or empty");
     }
   }
   next(); // Proceed to the next middleware or route handler
@@ -62,11 +79,11 @@ app.use((req, res, next) => {
 app.get("/log-search", async (req, res) => {
   const searchQuery = req.query.query?.trim(); // Extract query parameter
   if (!searchQuery) {
-    console.warn("Search query is missing in the request parameters");
+    logActivity("Warning", "Search query is missing in the request parameters");
     return res.status(400).send({ msg: "Search query is required" });
   }
 
-  console.log(`Search activity recorded: ${searchQuery}`);
+  logActivity("Info", `Search activity recorded: ${searchQuery}`);
 
   try {
     const results = await db
@@ -79,28 +96,30 @@ app.get("/log-search", async (req, res) => {
       })
       .toArray();
 
-    console.log(`Search results for '${searchQuery}':`, results);
-
+    logActivity("Info", `Search results for '${searchQuery}': ${results.length} items found`);
     res.send(results);
   } catch (error) {
-    console.error(`Error fetching search results: ${error.message}`);
+    logActivity("Error", `Error fetching search results: ${error.message}`);
     res.status(500).send({ msg: "Error fetching search results" });
   }
 });
 
 app.get("/", (req, res) => {
+  logActivity("Info", "Root endpoint hit");
   res.send("Select a collection, e.g., /collection/messages");
 });
 
 // Collection Routes (for MongoDB)
 app.param("collectionName", (req, res, next, collectionName) => {
   req.collection = db.collection(collectionName);
+  logActivity("Info", `Accessed collection: ${collectionName}`);
   return next();
 });
 
 app.get("/collection/:collectionName", (req, res, next) => {
   req.collection.find({}).toArray((e, results) => {
     if (e) return next(e);
+    logActivity("Info", `Fetched all documents from collection: ${req.params.collectionName}`);
     res.send(results);
   });
 });
@@ -108,6 +127,7 @@ app.get("/collection/:collectionName", (req, res, next) => {
 app.post("/collection/:collectionName", (req, res, next) => {
   req.collection.insertOne(req.body, (e, result) => {
     if (e) return next(e);
+    logActivity("Info", `Inserted document into collection: ${req.params.collectionName}`);
     res.send(result.ops[0]);
   });
 });
@@ -115,6 +135,7 @@ app.post("/collection/:collectionName", (req, res, next) => {
 app.get("/collection/:collectionName/:id", (req, res, next) => {
   req.collection.findOne({ _id: new ObjectID(req.params.id) }, (e, result) => {
     if (e) return next(e);
+    logActivity("Info", `Fetched document with ID: ${req.params.id}`);
     res.send(result);
   });
 });
@@ -126,6 +147,10 @@ app.put("/collection/:collectionName/:id", (req, res, next) => {
     { safe: true },
     (e, result) => {
       if (e) return next(e);
+      logActivity(
+        result.matchedCount === 1 ? "Info" : "Warning",
+        `Updated document with ID: ${req.params.id}`
+      );
       res.send(result.matchedCount === 1 ? { msg: "success" } : { msg: "error" });
     }
   );
@@ -134,6 +159,10 @@ app.put("/collection/:collectionName/:id", (req, res, next) => {
 app.delete("/collection/:collectionName/:id", (req, res, next) => {
   req.collection.deleteOne({ _id: new ObjectID(req.params.id) }, (e, result) => {
     if (e) return next(e);
+    logActivity(
+      result.deletedCount === 1 ? "Info" : "Warning",
+      `Deleted document with ID: ${req.params.id}`
+    );
     res.send(result.deletedCount === 1 ? { msg: "success" } : { msg: "error" });
   });
 });
@@ -142,7 +171,7 @@ app.delete("/collection/:collectionName/:id", (req, res, next) => {
 app.get("/search", async (req, res) => {
   const query = req.query.q; // Extract the search query from the request
   if (!query) {
-    console.log("Search query missing"); // Log if query is missing
+    logActivity("Warning", "Search query missing");
     return res.status(400).send({ msg: "Query parameter is required" });
   }
 
@@ -160,12 +189,10 @@ app.get("/search", async (req, res) => {
       })
       .toArray();
 
-    console.log(`Search query: ${query}`);
-    console.log("Search results:", results);
-
+    logActivity("Info", `Search query: '${query}' returned ${results.length} results`);
     res.send(results);
   } catch (error) {
-    console.error("Error during search:", error); // Log any errors
+    logActivity("Error", `Error during search: ${error.message}`);
     res.status(500).send({ msg: "Error during search", error });
   }
 });
@@ -174,7 +201,6 @@ app.get("/search", async (req, res) => {
 app.post("/place-order", async (req, res) => {
   const orderData = req.body;
 
-  // Validate required fields
   if (
     !orderData.firstName ||
     !orderData.lastName ||
@@ -187,37 +213,35 @@ app.post("/place-order", async (req, res) => {
     !orderData.cart ||
     orderData.cart.length === 0
   ) {
+    logActivity("Warning", "Incomplete order data received");
     return res.status(400).send({ msg: "Incomplete order data" });
   }
 
   try {
-    // Insert the order into the "orders" collection
     const orderResult = await db.collection("orders").insertOne(orderData);
-    console.log("Order successfully placed:", orderResult.insertedId);
+    logActivity("Info", `Order placed successfully: ${orderResult.insertedId}`);
 
-    // Update the AvailableInventory in the "lessons" collection
     const bulkOperations = orderData.cart.map((item) => ({
       updateOne: {
         filter: { id: item.id },
-        update: { $inc: { AvailableInventory: -1 } }, // Decrease inventory
+        update: { $inc: { AvailableInventory: -1 } },
       },
     }));
 
     const inventoryUpdateResult = await db
       .collection("lessons")
       .bulkWrite(bulkOperations);
-    console.log("Inventory updated:", inventoryUpdateResult);
 
+    logActivity("Info", `Inventory updated: ${inventoryUpdateResult.modifiedCount} items modified`);
     res.status(200).send({ msg: "Order placed successfully!" });
   } catch (error) {
-    console.error("Error placing order:", error);
+    logActivity("Error", `Error placing order: ${error.message}`);
     res.status(500).send({ msg: "Error placing order", error: error.message });
   }
 });
 
-
 // Start the server
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+  logActivity("Info", `Server running on port ${port}`);
 });
